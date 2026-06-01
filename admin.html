@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Golden Ticket Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --g:#c8930a;--gl:#f0c030;--ink:#1a1200;
+    --bg:#0e0c06;--s1:#181500;--s2:#211e07;
+    --bd:rgba(200,147,10,.18);--txt:#e8d898;--mut:rgba(232,216,152,.5);
+    --nv-bg:#0d2406;--nv-t:#7de040;--nv-bd:rgba(125,224,64,.22);
+    --mt-bg:#080e24;--mt-t:#5090ff;--mt-bd:rgba(80,144,255,.22);
+  }
+  html,body{min-height:100vh;background:var(--bg);color:var(--txt);font-family:'Montserrat',sans-serif;font-size:14px;}
+
+  .topbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:.85rem 1.75rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .tl{display:flex;align-items:center;gap:12px;}
+  .t-title{font-family:'Playfair Display',serif;font-size:19px;color:var(--gl);font-weight:700;}
+  .t-sub{font-size:10px;color:var(--mut);letter-spacing:1.5px;margin-top:1px;}
+  .badge{background:rgba(200,147,10,.12);border:1px solid var(--bd);color:var(--g);font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:99px;}
+
+  .main{padding:1.75rem;max-width:960px;margin:0 auto;}
+  .alert{display:none;background:rgba(255,70,40,.1);border:1px solid rgba(255,70,40,.28);border-radius:10px;padding:9px 14px;font-size:12px;color:#ff9980;margin-bottom:1.25rem;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.75rem;}
+  .sc{background:var(--s1);border:1px solid var(--bd);border-radius:13px;padding:1.1rem;}
+  .sl{font-size:9px;letter-spacing:2px;color:var(--mut);font-weight:700;margin-bottom:5px;}
+  .sv{font-family:'Playfair Display',serif;font-size:34px;color:var(--gl);line-height:1;}
+  .ss{font-size:10px;color:var(--mut);margin-top:3px;}
+  .pt{height:4px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-top:9px;}
+  .pf{height:100%;border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+  .pf-g{background:var(--g);}
+  .pf-nv{background:#7de040;}
+  .pf-mt{background:#5090ff;}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.75rem;}
+  .panel{background:var(--s1);border:1px solid var(--bd);border-radius:13px;padding:1.1rem;}
+  .panel-nv{border-color:var(--nv-bd);}
+  .panel-mt{border-color:var(--mt-bd);}
+  .pt-title{font-size:12px;font-weight:700;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+  .pt-title-nv{color:var(--nv-t);}
+  .pt-title-mt{color:var(--mt-t);}
+  .chip{display:inline-block;font-size:11px;padding:3px 10px;border-radius:99px;margin:2px 2px 2px 0;font-weight:500;}
+  .chip-nv{background:var(--nv-bg);color:var(--nv-t);border:1px solid var(--nv-bd);}
+  .chip-mt{background:var(--mt-bg);color:var(--mt-t);border:1px solid var(--mt-bd);}
+  .empty{font-size:12px;color:var(--mut);font-style:italic;}
+
+  .tbl-sec{margin-bottom:1.75rem;}
+  .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .sec-ttl{font-size:9px;letter-spacing:2.5px;color:var(--mut);font-weight:700;}
+  .upd{font-size:10px;color:var(--mut);}
+  .tbl-wrap{background:var(--s1);border:1px solid var(--bd);border-radius:13px;overflow:hidden;}
+  table{width:100%;border-collapse:collapse;}
+  thead th{text-align:left;padding:9px 15px;font-size:9px;letter-spacing:2px;color:var(--mut);font-weight:700;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.18);}
+  tbody td{padding:9px 15px;border-bottom:1px solid rgba(200,147,10,.07);color:var(--txt);font-size:12px;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:rgba(200,147,10,.04);}
+  .nc{color:var(--mut);font-size:11px;}
+  .tc{font-size:11px;color:var(--mut);}
+  .rb{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.8px;padding:2px 9px;border-radius:99px;}
+  .rb-nv{background:var(--nv-bg);color:var(--nv-t);border:1px solid var(--nv-bd);}
+  .rb-mt{background:var(--mt-bg);color:var(--mt-t);border:1px solid var(--mt-bd);}
+  .etbl{padding:2.5rem;text-align:center;color:var(--mut);font-style:italic;font-size:14px;}
+
+  .actions{display:flex;gap:9px;flex-wrap:wrap;}
+  .btn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;letter-spacing:.3px;cursor:pointer;border:1px solid var(--bd);background:var(--s2);color:var(--txt);transition:background .15s;font-family:'Montserrat',sans-serif;}
+  .btn:hover{background:rgba(200,147,10,.1);border-color:rgba(200,147,10,.38);}
+  .btn-p{background:rgba(200,147,10,.12);border-color:rgba(200,147,10,.38);color:var(--gl);}
+  .btn-p:hover{background:rgba(200,147,10,.22);}
+  .btn-d{color:#ff8888;border-color:rgba(255,70,40,.28);}
+  .btn-d:hover{background:rgba(255,70,40,.1);}
+
+  @media(max-width:640px){.stats{grid-template-columns:1fr 1fr;}.two{grid-template-columns:1fr;}.main{padding:1rem;}.topbar{padding:.75rem 1rem;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tl">
+    <span style="font-size:20px">🏆</span>
+    <div>
+      <div class="t-title">Admin Dashboard</div>
+      <div class="t-sub">GOLDEN TICKET — LIVE RESULTS</div>
+    </div>
+  </div>
+  <span class="badge">ADMIN ONLY</span>
+</div>
+
+<div class="main">
+  <div class="alert" id="alertBox"></div>
+
+  <div class="stats">
+    <div class="sc">
+      <div class="sl">TOTAL</div>
+      <div class="sv" id="tvTotal">0</div>
+      <div class="ss">of 20 participants</div>
+      <div class="pt"><div class="pf pf-g" id="barTotal" style="width:0%"></div></div>
+    </div>
+    <div class="sc">
+      <div class="sl">NVIDIA</div>
+      <div class="sv" id="tvNv">0</div>
+      <div class="ss" id="ssNv">7 remaining</div>
+      <div class="pt"><div class="pf pf-nv" id="barNv" style="width:0%"></div></div>
+    </div>
+    <div class="sc">
+      <div class="sl">META</div>
+      <div class="sv" id="tvMt">0</div>
+      <div class="ss" id="ssMt">13 remaining</div>
+      <div class="pt"><div class="pf pf-mt" id="barMt" style="width:0%"></div></div>
+    </div>
+    <div class="sc">
+      <div class="sl">STATUS</div>
+      <div class="sv" id="tvStatus" style="font-size:26px">—</div>
+      <div class="ss" id="ssStatus">Target: 7 + 13 = 20</div>
+      <div class="pt"><div class="pf pf-g" id="barAll" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="panel panel-nv">
+      <div class="pt-title pt-title-nv">● NVIDIA TEAM <span style="font-weight:400;font-size:10px" id="nvLabel">(0 / 7)</span></div>
+      <div id="nvNames"><span class="empty">No entries yet.</span></div>
+    </div>
+    <div class="panel panel-mt">
+      <div class="pt-title pt-title-mt">● META TEAM <span style="font-weight:400;font-size:10px" id="mtLabel">(0 / 13)</span></div>
+      <div id="mtNames"><span class="empty">No entries yet.</span></div>
+    </div>
+  </div>
+
+  <div class="tbl-sec">
+    <div class="sec-hdr">
+      <div class="sec-ttl">ALL SUBMISSIONS</div>
+      <div class="upd" id="lastUpd">—</div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="etbl" id="emptyMsg">Waiting for participants…</div>
+      <table id="tbl" style="display:none">
+        <thead><tr><th>#</th><th>NAME</th><th>ASSIGNMENT</th><th>TIME</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-p" onclick="refresh()">↺ &nbsp;Refresh</button>
+    <button class="btn" onclick="exportCSV()">↓ &nbsp;Export CSV</button>
+    <button class="btn" onclick="copyList()">⎘ &nbsp;Copy Team List</button>
+    <button class="btn btn-d" onclick="resetAll()">✕ &nbsp;Reset (re-init deck)</button>
+  </div>
+</div>
+
+<script>
+// ── !! REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL !! ──
+const API_URL = "https://script.google.com/macros/s/AKfycbxK02if9buwHgE5SAiCLbCom7fgnN5Sip9bZ1yKj8LF3ic1S1yvh8fipg2jnYrJwcF8/exec";
+// ─────────────────────────────────────────────────────────
+
+let lastData = { rows:[], nvidia:0, meta:0, total:0 };
+
+function fmt(iso){
+  try{
+    const d=new Date(iso);
+    return d.toLocaleString('en-US',{month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true});
+  }catch(e){return iso||'—';}
+}
+
+async function fetchStatus(){
+  if(API_URL==='YOUR_APPS_SCRIPT_URL_HERE') return lastData; // no-op in demo
+  const r=await fetch(`${API_URL}?action=status`);
+  return r.json();
+}
+
+function render(data){
+  lastData=data;
+  const nv=data.nvidia||0, mt=data.meta||0, tot=data.total||0;
+  document.getElementById('tvTotal').textContent=tot;
+  document.getElementById('tvNv').textContent=nv;
+  document.getElementById('tvMt').textContent=mt;
+  document.getElementById('barTotal').style.width=Math.min(100,Math.round(tot/20*100))+'%';
+  document.getElementById('barNv').style.width=Math.min(100,Math.round(nv/7*100))+'%';
+  document.getElementById('barMt').style.width=Math.min(100,Math.round(mt/13*100))+'%';
+  document.getElementById('barAll').style.width=Math.min(100,Math.round(tot/20*100))+'%';
+  const nvLeft=Math.max(0,7-nv), mtLeft=Math.max(0,13-mt);
+  document.getElementById('ssNv').textContent=nvLeft>0?nvLeft+' remaining':'✓ Target reached';
+  document.getElementById('ssMt').textContent=mtLeft>0?mtLeft+' remaining':'✓ Target reached';
+  const done=nv>=7&&mt>=13;
+  document.getElementById('tvStatus').textContent=done?'✓':(tot+'/20');
+  document.getElementById('ssStatus').textContent=done?'All slots filled!':'Target: 7 + 13 = 20';
+  document.getElementById('nvLabel').textContent=`(${nv} / 7)`;
+  document.getElementById('mtLabel').textContent=`(${mt} / 13)`;
+  const rows=data.rows||[];
+  const nvRows=rows.filter(r=>r.assignment==='NVIDIA');
+  const mtRows=rows.filter(r=>r.assignment==='META');
+  document.getElementById('nvNames').innerHTML=nvRows.length
+    ?nvRows.map(r=>`<span class="chip chip-nv">${r.name}</span>`).join('')
+    :'<span class="empty">No entries yet.</span>';
+  document.getElementById('mtNames').innerHTML=mtRows.length
+    ?mtRows.map(r=>`<span class="chip chip-mt">${r.name}</span>`).join('')
+    :'<span class="empty">No entries yet.</span>';
+  const alert=document.getElementById('alertBox');
+  if(nv>7||mt>13){
+    alert.style.display='block';
+    alert.textContent=`⚠ Over-allocation — NVIDIA: ${nv}/7${nv>7?' (+'+(nv-7)+')':''} · META: ${mt}/13${mt>13?' (+'+(mt-13)+')':''}`;
+  }else{ alert.style.display='none'; }
+  if(rows.length===0){
+    document.getElementById('emptyMsg').style.display='block';
+    document.getElementById('tbl').style.display='none';
+  }else{
+    document.getElementById('emptyMsg').style.display='none';
+    document.getElementById('tbl').style.display='table';
+    document.getElementById('tbody').innerHTML=rows.map((r,i)=>`
+      <tr>
+        <td class="nc">${i+1}</td>
+        <td>${r.name||'—'}</td>
+        <td><span class="rb rb-${(r.assignment||'').toLowerCase()}">${r.assignment||'—'}</span></td>
+        <td class="tc">${fmt(r.time)}</td>
+      </tr>`).join('');
+  }
+  document.getElementById('lastUpd').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+}
+
+async function refresh(){
+  try{ render(await fetchStatus()); }
+  catch(e){ console.error(e); }
+}
+
+function exportCSV(){
+  const rows=lastData.rows||[];
+  if(!rows.length){ alert('No data to export yet.'); return; }
+  const BOM='\uFEFF', hdr='No,Name,Assignment,Timestamp\n';
+  const body=rows.map((r,i)=>`${i+1},"${(r.name||'').replace(/"/g,'""')}",${r.assignment},${fmt(r.time)}`).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([BOM+hdr+body],{type:'text/csv;charset=utf-8'}));
+  a.download=`golden_ticket_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function copyList(){
+  const rows=lastData.rows||[];
+  if(!rows.length){ alert('No data yet.'); return; }
+  const nv=rows.filter(r=>r.assignment==='NVIDIA').map(r=>r.name).join('\n');
+  const mt=rows.filter(r=>r.assignment==='META').map(r=>r.name).join('\n');
+  const txt=`[ NVIDIA TEAM — ${rows.filter(r=>r.assignment==='NVIDIA').length} members ]\n${nv||'(none)'}\n\n[ META TEAM — ${rows.filter(r=>r.assignment==='META').length} members ]\n${mt||'(none)'}`;
+  navigator.clipboard.writeText(txt).then(()=>alert('Copied!')).catch(()=>{ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Copied!'); });
+}
+
+async function resetAll(){
+  if(!confirm('This will RE-INITIALIZE the deck (new shuffle) and is separate from the Results sheet.\nAre you sure?')) return;
+  if(API_URL==='YOUR_APPS_SCRIPT_URL_HERE'){ alert('Set API_URL first.'); return; }
+  const r=await fetch(`${API_URL}?action=init`);
+  const d=await r.json();
+  alert(d.message||JSON.stringify(d));
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

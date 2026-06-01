@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golden Ticket — Silicon Valley Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100vh;
+    background: #0e0b02;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    padding: 2rem 1rem;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 30% 20%, rgba(212,160,23,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse at 70% 80%, rgba(212,160,23,0.05) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .page { width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
+  .school-label { font-family: 'EB Garamond', serif; font-style: italic; color: rgba(212,160,23,0.5); font-size: 12px; letter-spacing: 2px; }
+
+  /* ── Ticket shell ── */
+  .ticket {
+    width: 100%;
+    background: linear-gradient(158deg, #e6b500 0%, #f4c230 28%, #dfaa00 58%, #c89000 100%);
+    border-radius: 20px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 0 0 2px #9a7000, 0 0 0 4px #0e0b02, 0 24px 64px rgba(0,0,0,0.85), 0 0 48px rgba(212,160,23,0.12);
+  }
+  .ticket::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.07) 1px, transparent 0);
+    background-size: 18px 18px;
+    pointer-events: none;
+  }
+  .dots { display: flex; justify-content: space-between; padding: 10px 14px; }
+  .dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(20,12,0,0.5); }
+
+  /* ── Header ── */
+  .t-header { text-align: center; padding: 0 2rem 1.2rem; }
+  .t-sub { font-family: 'EB Garamond', serif; font-style: italic; font-size: 12px; color: #5a3800; letter-spacing: 2px; margin-bottom: 2px; }
+  .t-title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: clamp(42px, 11vw, 60px); color: #1a1200; line-height: 0.88; text-shadow: 2px 3px 0 rgba(255,220,60,0.4); }
+  .t-access { font-size: 9px; letter-spacing: 4px; color: #5a3800; font-weight: 700; margin-top: 7px; }
+  .divider { display: flex; align-items: center; gap: 8px; margin: 0 2rem; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(26,18,0,0.25); }
+  .divider span { font-size: 7px; color: rgba(26,18,0,0.4); }
+
+  /* ── Body ── */
+  .t-body { padding: 1.1rem 1.75rem 0.75rem; }
+  .field-label { font-size: 9px; letter-spacing: 3px; color: #5a3800; font-weight: 700; margin-bottom: 5px; }
+  .name-input {
+    width: 100%; padding: 10px 14px;
+    background: rgba(255,255,255,0.32); border: 1.5px solid rgba(90,56,0,0.3); border-radius: 10px;
+    font-family: 'EB Garamond', serif; font-size: 17px; color: #1a1200; outline: none;
+    transition: background .2s, border-color .2s;
+  }
+  .name-input::placeholder { color: rgba(80,50,0,0.4); font-style: italic; }
+  .name-input:focus { background: rgba(255,255,255,0.52); border-color: rgba(90,56,0,0.65); }
+  .name-input:disabled { opacity: .65; cursor: default; }
+  .name-warn { font-size: 11px; color: #8a0000; font-weight: 600; margin-top: 4px; display: none; }
+
+  /* ── Scratch zone ── */
+  .scratch-label { text-align: center; font-family: 'EB Garamond', serif; font-style: italic; font-size: 12px; color: #5a3800; margin: 1rem 0 6px; }
+  .pct-bar-wrap { height: 3px; background: rgba(0,0,0,0.15); border-radius: 99px; margin-bottom: 8px; overflow: hidden; }
+  .pct-bar { height: 100%; border-radius: 99px; background: rgba(20,10,0,0.5); width: 0%; transition: width .1s; }
+  .scratch-wrap { position: relative; border-radius: 14px; overflow: hidden; cursor: crosshair; user-select: none; border: 2px solid rgba(80,50,0,0.18); }
+  .result-layer { display: flex; align-items: center; justify-content: center; flex-direction: column; height: 116px; background: #fffdf5; }
+  .result-logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 36px; letter-spacing: 3px; color: #1a1200; }
+  .result-tag { font-family: 'EB Garamond', serif; font-style: italic; font-size: 13px; color: #777; margin-top: 2px; }
+  canvas { position: absolute; inset: 0; touch-action: none; }
+
+  /* ── Footer row ── */
+  .t-footer { display: flex; justify-content: space-between; align-items: center; padding: 0 0 0.4rem; margin-top: 0.5rem; }
+  .seal { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(80,50,0,0.3); background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .ornament { font-family: 'EB Garamond', serif; color: rgba(80,50,0,0.4); letter-spacing: 7px; font-size: 12px; }
+
+  /* ── Status / saved notice ── */
+  .saved-notice {
+    display: none; margin-top: .5rem;
+    background: rgba(0,0,0,0.16); border-radius: 10px;
+    padding: 9px 14px; text-align: center;
+    font-size: 12px; color: #1a1200; font-weight: 600; letter-spacing: .3px;
+  }
+  .api-error {
+    display: none; margin-top: .5rem;
+    background: rgba(160,0,0,0.12); border-radius: 10px;
+    padding: 9px 14px; text-align: center;
+    font-size: 11px; color: #8a0000; line-height: 1.5;
+  }
+  .spinner {
+    display: none; margin-top: .5rem; text-align: center;
+    font-size: 11px; color: #5a3800; letter-spacing: 1px;
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .footer-note { font-family: 'EB Garamond', serif; font-style: italic; font-size: 11px; color: rgba(212,160,23,0.35); text-align: center; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="school-label">Global Entrepreneurship Summer School</div>
+
+  <div class="ticket">
+    <div class="dots" id="dotsTop"></div>
+    <div class="t-header">
+      <div class="t-sub">Global Entrepreneurship Summer School</div>
+      <div class="t-title">GOLDEN<br>TICKET</div>
+      <div class="t-access">— SILICON VALLEY ACCESS —</div>
+    </div>
+    <div class="divider"><span>◆</span></div>
+    <div class="t-body">
+      <div style="margin-bottom:1.1rem">
+        <div class="field-label">YOUR NAME</div>
+        <input class="name-input" id="nameInput" type="text" placeholder="Enter your full name" autocomplete="off">
+        <div class="name-warn" id="nameWarn">Please enter your name before scratching.</div>
+      </div>
+      <div class="scratch-label">Scratch the panel below to reveal your company assignment!</div>
+      <div class="pct-bar-wrap"><div class="pct-bar" id="pctBar"></div></div>
+      <div class="scratch-wrap" id="scratchWrap">
+        <div class="result-layer" id="resultLayer">
+          <div class="result-logo" id="resultLogo">???</div>
+          <div class="result-tag" id="resultTag">Your assignment awaits</div>
+        </div>
+        <canvas id="scratchCanvas"></canvas>
+      </div>
+      <div class="t-footer">
+        <div class="seal">👁</div>
+        <div class="ornament">✦ ✦ ✦</div>
+        <div class="seal">∞</div>
+      </div>
+      <div class="spinner" id="spinner">RECORDING YOUR RESULT…</div>
+      <div class="saved-notice" id="savedNotice"></div>
+      <div class="api-error" id="apiError"></div>
+    </div>
+    <div class="dots" id="dotsBot"></div>
+  </div>
+
+  <div class="footer-note">Silicon Valley Access · Summer Session 2025</div>
+</div>
+
+<script>
+// ── !! REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL !! ──
+const API_URL = "https://script.google.com/macros/s/AKfycbxK02if9buwHgE5SAiCLbCom7fgnN5Sip9bZ1yKj8LF3ic1S1yvh8fipg2jnYrJwcF8/exec";
+// ─────────────────────────────────────────────────────────
+
+['dotsTop','dotsBot'].forEach(id => {
+  const el = document.getElementById(id);
+  for(let i=0;i<30;i++){ const s=document.createElement('span'); el.appendChild(s); }
+});
+
+const canvas   = document.getElementById('scratchCanvas');
+const ctx      = canvas.getContext('2d');
+const wrap     = document.getElementById('scratchWrap');
+const logoEl   = document.getElementById('resultLogo');
+const tagEl    = document.getElementById('resultTag');
+const layerEl  = document.getElementById('resultLayer');
+const pctBar   = document.getElementById('pctBar');
+const spinner  = document.getElementById('spinner');
+const notice   = document.getElementById('savedNotice');
+const errBox   = document.getElementById('apiError');
+const nameInp  = document.getElementById('nameInput');
+const nameWarn = document.getElementById('nameWarn');
+
+let painting=false, revealed=false, recorded=false;
+let pendingResult=null;
+
+function initCanvas(){
+  const r=wrap.getBoundingClientRect();
+  canvas.width=Math.round(r.width);
+  canvas.height=Math.round(r.height);
+  draw();
+}
+function draw(){
+  ctx.globalCompositeOperation='source-over';
+  for(let x=0;x<canvas.width;x+=20){
+    for(let y=0;y<canvas.height;y+=20){
+      ctx.fillStyle=(Math.floor(x/20)+Math.floor(y/20))%2===0?'#c8930a':'#b07e06';
+      ctx.fillRect(x,y,19,19);
+    }
+  }
+  ctx.fillStyle='rgba(26,14,0,0.83)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#f0c030';
+  ctx.font=`bold ${Math.round(canvas.height*0.125)}px 'Playfair Display',Georgia,serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('✦  SCRATCH HERE  ✦',canvas.width/2,canvas.height/2);
+}
+function xy(e){
+  const r=canvas.getBoundingClientRect();
+  const sx=canvas.width/r.width, sy=canvas.height/r.height;
+  const s=e.touches?e.touches[0]:e;
+  return{x:(s.clientX-r.left)*sx,y:(s.clientY-r.top)*sy};
+}
+function scratch(x,y){
+  ctx.globalCompositeOperation='destination-out';
+  ctx.beginPath(); ctx.arc(x,y,30,0,Math.PI*2); ctx.fill();
+  checkReveal();
+}
+function checkReveal(){
+  const d=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  let c=0;
+  for(let i=3;i<d.length;i+=4) if(d[i]===0) c++;
+  const pct=Math.round(c/(canvas.width*canvas.height)*100);
+  pctBar.style.width=Math.min(100,pct)+'%';
+  if(pct>55&&!revealed){ revealed=true; showResult(); }
+}
+function showResult(){
+  if(pendingResult){
+    applyResult(pendingResult);
+  }
+}
+function applyResult(data){
+  canvas.style.transition='opacity .4s'; canvas.style.opacity='0';
+  setTimeout(()=>canvas.style.display='none',400);
+  pctBar.style.display='none';
+  logoEl.textContent=data.assignment;
+  tagEl.textContent=data.assignment==='NVIDIA'?'🎉 You\'re on the NVIDIA team!':'🎉 You\'re on the META team!';
+  layerEl.style.background=data.assignment==='NVIDIA'
+    ?'linear-gradient(135deg,#eaf5df,#d3edba)'
+    :'linear-gradient(135deg,#e7efff,#cfdaf8)';
+  logoEl.style.color=data.assignment==='NVIDIA'?'#285010':'#182e8a';
+  nameInp.disabled=true;
+}
+
+// ── API call ────────────────────────────────────────────────
+async function callApi(name){
+  if(API_URL==='YOUR_APPS_SCRIPT_URL_HERE'){
+    // Demo mode (no API configured)
+    return { ok:true, assignment: Math.random()<0.35?'NVIDIA':'META', name };
+  }
+  const url=`${API_URL}?action=draw&name=${encodeURIComponent(name)}`;
+  const res=await fetch(url);
+  return res.json();
+}
+
+// ── Start scratch → prefetch result immediately ────────────
+function onScratchStart(){
+  if(pendingResult||recorded) return;
+  const name=nameInp.value.trim();
+  if(!name){ nameWarn.style.display='block'; nameInput.focus(); return false; }
+  nameWarn.style.display='none';
+
+  if(!pendingResult&&!recorded){
+    recorded=true; // lock so only one API call happens
+    spinner.style.display='block';
+    callApi(name).then(data=>{
+      spinner.style.display='none';
+      if(data.error){
+        errBox.style.display='block';
+        errBox.textContent='⚠ '+data.error;
+        recorded=false; return;
+      }
+      pendingResult=data;
+      notice.style.display='block';
+      notice.textContent=`✅ ${data.name} — assigned to ${data.assignment}. Result recorded! (NVIDIA: ${data.nvidia}/7 · META: ${data.meta}/13)`;
+      if(revealed) applyResult(data);
+    }).catch(err=>{
+      spinner.style.display='none';
+      errBox.style.display='block';
+      errBox.textContent='⚠ Connection error: '+err.message+'. Please contact the organizer.';
+      recorded=false;
+    });
+  }
+  return true;
+}
+
+canvas.addEventListener('mousedown',e=>{
+  if(!onScratchStart()) return;
+  painting=true; const p=xy(e); scratch(p.x,p.y);
+});
+canvas.addEventListener('mousemove',e=>{ if(!painting)return; const p=xy(e); scratch(p.x,p.y); });
+canvas.addEventListener('mouseup',()=>painting=false);
+canvas.addEventListener('mouseleave',()=>painting=false);
+canvas.addEventListener('touchstart',e=>{ e.preventDefault(); if(!onScratchStart())return; painting=true; const p=xy(e); scratch(p.x,p.y); },{passive:false});
+canvas.addEventListener('touchmove',e=>{ e.preventDefault(); if(!painting)return; const p=xy(e); scratch(p.x,p.y); },{passive:false});
+canvas.addEventListener('touchend',()=>painting=false);
+
+window.addEventListener('load',()=>setTimeout(initCanvas,80));
+window.addEventListener('resize',initCanvas);
+</script>
+</body>
+</html>
