@@ -169,7 +169,7 @@ const nameWarn = document.getElementById('nameWarn');
 
 let painting=false, revealed=false, recorded=false;
 let pendingResult=null;
-let preAssigned=false;
+let apiCalled=false;
 
 function initCanvas(){
   const r=wrap.getBoundingClientRect();
@@ -263,27 +263,36 @@ async function callApi(name){
   return res.json();
 }
 
-// ── Start scratch → prefetch result immediately ────────────
+// ── Start scratch — result already prefetched via name input ──
 function onScratchStart(){
-  if(pendingResult||recorded) return;
+  if(recorded) return true;
   const name=nameInp.value.trim();
-  if(!name){ nameWarn.style.display='block'; nameInput.focus(); return false; }
+  if(!name){ nameWarn.style.display='block'; nameInp.focus(); return false; }
   nameWarn.style.display='none';
 
-  if(!pendingResult&&!recorded){
-    recorded=true; // lock so only one API call happens
+  if(pendingResult && !recorded){
+    // Result already ready — just mark recorded and show notice
+    recorded=true;
+    notice.style.display='block';
+    notice.textContent=`✅ ${pendingResult.name} — assigned to ${pendingResult.assignment}. Result recorded! (NVIDIA: ${pendingResult.nvidia}/7 · META: ${pendingResult.meta}/13)`;
+    return true;
+  }
+
+  if(!apiCalled && !recorded){
+    // Fallback: call API now if prefetch didn't happen yet
+    recorded=true;
+    apiCalled=true;
     spinner.style.display='block';
     callApi(name).then(data=>{
       spinner.style.display='none';
       if(data.error){
         errBox.style.display='block';
         errBox.textContent='⚠ '+data.error;
-        recorded=false; return;
+        recorded=false; apiCalled=false; return;
       }
       pendingResult=data;
       notice.style.display='block';
       notice.textContent=`✅ ${data.name} — assigned to ${data.assignment}. Result recorded! (NVIDIA: ${data.nvidia}/7 · META: ${data.meta}/13)`;
-      // Pre-load result text under the scratch surface
       logoEl.textContent=data.assignment;
       logoEl.style.fontSize='52px';
       logoEl.style.fontWeight='900';
@@ -296,7 +305,7 @@ function onScratchStart(){
       spinner.style.display='none';
       errBox.style.display='block';
       errBox.textContent='⚠ Connection error: '+err.message+'. Please contact the organizer.';
-      recorded=false;
+      recorded=false; apiCalled=false;
     });
   }
   return true;
@@ -315,6 +324,26 @@ canvas.addEventListener('touchend',()=>{painting=false;lastX=null;lastY=null;});
 
 window.addEventListener('load',()=>setTimeout(initCanvas,80));
 window.addEventListener('resize',initCanvas);
+
+// Prefetch result as soon as user starts typing name
+nameInp.addEventListener('input', ()=>{
+  const name = nameInp.value.trim();
+  if(name.length >= 2 && !apiCalled && !recorded){
+    apiCalled=true;
+    callApi(name).then(data=>{
+      if(data.error){ apiCalled=false; return; }
+      pendingResult=data;
+      logoEl.textContent=data.assignment;
+      logoEl.style.fontSize='52px';
+      logoEl.style.fontWeight='900';
+      logoEl.style.letterSpacing='4px';
+      logoEl.style.color=data.assignment==='NVIDIA'?'#1a5c00':'#0a2080';
+      tagEl.textContent=data.assignment==='NVIDIA'?'🎉 You\'re on the NVIDIA team!':'🎉 You\'re on the META team!';
+      layerEl.style.background=data.assignment==='NVIDIA'?'#e8f5de':'#e8eeff';
+    }).catch(()=>{ apiCalled=false; });
+  }
+  if(name.length === 0){ apiCalled=false; pendingResult=null; }
+});
 </script>
 </body>
 </html>
