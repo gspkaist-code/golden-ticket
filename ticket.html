@@ -227,7 +227,12 @@ function checkReveal(){
   for(let i=3;i<d.length;i+=4) if(d[i]===0) c++;
   const pct=Math.round(c/(canvas.width*canvas.height)*100);
   pctBar.style.width=Math.min(100,pct)+'%';
-  if(pct>45&&!revealed){ revealed=true; showResult(); }
+  if(pct>40&&!revealed){
+    revealed=true;
+    // Clear entire canvas instantly
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    showResult();
+  }
 }
 function showResult(){
   if(pendingResult){
