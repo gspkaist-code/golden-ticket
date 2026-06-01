@@ -146,7 +146,7 @@
 
 <script>
 // ── !! REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL !! ──
-const API_URL = "https://script.google.com/macros/s/AKfycbxK02if9buwHgE5SAiCLbCom7fgnN5Sip9bZ1yKj8LF3ic1S1yvh8fipg2jnYrJwcF8/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwctkgMR11N5YElNj76MbLL68G_AcabT0dyKXdi-E7Wc_myClVYJcTyZD2NRLl3I9ap/exec";
 // ─────────────────────────────────────────────────────────
 
 ['dotsTop','dotsBot'].forEach(id => {
@@ -333,7 +333,7 @@ window.addEventListener('resize',initCanvas);
 // Prefetch result as soon as user starts typing name
 nameInp.addEventListener('input', ()=>{
   const name = nameInp.value.trim();
-  if(name.length >= 2 && !apiCalled && !recorded){
+  if(name.length >= 1 && !apiCalled && !recorded){
     apiCalled=true;
     callApi(name).then(data=>{
       if(data.error){ apiCalled=false; return; }
