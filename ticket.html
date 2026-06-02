@@ -330,12 +330,18 @@ canvas.addEventListener('touchend',()=>{painting=false;lastX=null;lastY=null;});
 window.addEventListener('load',()=>setTimeout(initCanvas,80));
 window.addEventListener('resize',initCanvas);
 
-// Prefetch result as soon as user starts typing name
+// Prefetch result after user stops typing for 1.5s
+let typingTimer=null;
 nameInp.addEventListener('input', ()=>{
   const name = nameInp.value.trim();
-  if(name.length >= 1 && !apiCalled && !recorded){
+  if(name.length === 0){ apiCalled=false; pendingResult=null; return; }
+  clearTimeout(typingTimer);
+  if(apiCalled || recorded) return;
+  typingTimer = setTimeout(()=>{
+    const finalName = nameInp.value.trim();
+    if(!finalName || apiCalled || recorded) return;
     apiCalled=true;
-    callApi(name).then(data=>{
+    callApi(finalName).then(data=>{
       if(data.error){ apiCalled=false; return; }
       pendingResult=data;
       logoEl.textContent=data.assignment;
@@ -346,8 +352,7 @@ nameInp.addEventListener('input', ()=>{
       tagEl.textContent=data.assignment==='NVIDIA'?'🎉 You\'re on the NVIDIA team!':'🎉 You\'re on the META team!';
       layerEl.style.background=data.assignment==='NVIDIA'?'#e8f5de':'#e8eeff';
     }).catch(()=>{ apiCalled=false; });
-  }
-  if(name.length === 0){ apiCalled=false; pendingResult=null; }
+  }, 1500);
 });
 </script>
 </body>
